@@ -300,20 +300,20 @@ service config_bt_addr /system/bin/btnvtool -O
     group bluetooth radio
     oneshot
 
-service cnd /system/bin/cnd
-    class late_start
-    socket cnd stream 660 root inet
+#service cnd /system/bin/cnd
+#    class late_start
+#    socket cnd stream 660 root inet
 
-service dpmd /system/bin/dpmd
-    class main
-    socket dpmd stream 660 root system
+#service dpmd /system/bin/dpmd
+#    class main
+#    socket dpmd stream 660 root system
 
 service hciattach /system/bin/sh /system/etc/init.qcom.bt.sh
     class late_start
     user bluetooth
     group bluetooth net_bt_admin
     disabled
-    seclabel u:r:bluetooth_loader:s0
+#    seclabel u:r:bluetooth_loader:s0
     oneshot
 
 on property:bluetooth.hciattach=true
