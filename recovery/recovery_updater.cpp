@@ -210,79 +210,59 @@ err_ret:
 }
 
 /* verify_baseband("BASEBAND_VERSION", "BASEBAND_VERSION", ...) */
-Value * VerifyBasebandFn(const char *name, State *state, int argc, Expr *argv[]) {
+Value * VerifyBasebandFn(const char *name, State *state,
+                         const std::vector<std::unique_ptr<Expr>>& argv) {
     char current_baseband_version[BASEBAND_VER_BUF_LEN];
-    int i, ret;
+    int ret;
 
     ret = get_baseband_version(current_baseband_version, BASEBAND_VER_BUF_LEN);
     if (ret) {
-        return ErrorAbort(state, kFreadFailure, "%s() failed to read current baseband version: %d",
+        return ErrorAbort(state, kVendorFailure, "%s() failed to read current baseband version: %d",
                 name, ret);
     }
 
-    char** baseband_version = ReadVarArgs(state, argc, argv);
-    if (baseband_version == NULL) {
-        return ErrorAbort(state, kArgsParsingFailure, "%s() error parsing arguments", name);
-    }
+    std::vector<std::string> args;
+        if (!ReadArgs(state, argv, &args)) {
+            return ErrorAbort(state, kArgsParsingFailure, "%s() error parsing arguments", name);
+        }
 
-    ret = 0;
-    for (i = 0; i < argc; i++) {
+    for (auto& baseband_version : args) {
         uiPrintf(state, "Comparing baseband version %s to %s",
-                 baseband_version[i], current_baseband_version);
-        if (strncmp(baseband_version[i], current_baseband_version, strlen(baseband_version[i])) == 0) {
-            ret = 1;
-            break;
+                 baseband_version.c_str(), current_baseband_version);
+        if (strncmp(baseband_version.c_str(), current_baseband_version, baseband_version.length()) == 0) {
+            return StringValue(strdup("1"));
         }
     }
 
-    if (ret == 0) {
-        uiPrintf(state, "ERROR: It appears you are running an unsupported baseband.");
-    }
-
-    for (i = 0; i < argc; i++) {
-        free(baseband_version[i]);
-    }
-    free(baseband_version);
-
-    return StringValue(strdup(ret ? "1" : "0"));
+    return StringValue(strdup("0"));
 }
 
 /* verify_trustzone("TZ_VERSION", "TZ_VERSION", ...) */
-Value * VerifyTrustZoneFn(const char *name, State *state, int argc, Expr *argv[]) {
+Value * VerifyTrustZoneFn(const char *name, State *state,
+                          const std::vector<std::unique_ptr<Expr>>& argv) {
     char current_tz_version[TZ_VER_BUF_LEN];
-    int i, ret;
+    int ret;
 
     ret = get_tz_version(current_tz_version, TZ_VER_BUF_LEN);
     if (ret) {
-        return ErrorAbort(state, kFreadFailure, "%s() failed to read current TZ version: %d",
+        return ErrorAbort(state, kVendorFailure, "%s() failed to read current TZ version: %d",
                 name, ret);
     }
 
-    char** tz_version = ReadVarArgs(state, argc, argv);
-    if (tz_version == NULL) {
+    std::vector<std::string> args;
+    if (!ReadArgs(state, argv, &args)) {
         return ErrorAbort(state, kArgsParsingFailure, "%s() error parsing arguments", name);
     }
 
-    ret = 0;
-    for (i = 0; i < argc; i++) {
+    for (auto& tz_version : args) {
         uiPrintf(state, "Comparing TZ version %s to %s",
-                tz_version[i], current_tz_version);
-        if (strncmp(tz_version[i], current_tz_version, strlen(tz_version[i])) == 0) {
-            ret = 1;
-            break;
+                tz_version.c_str(), current_tz_version);
+        if (strncmp(tz_version.c_str(), current_tz_version, tz_version.length()) == 0) {
+            return StringValue(strdup("1"));
         }
     }
 
-    if (ret == 0) {
-        uiPrintf(state, "ERROR: It appears you are running an unsupported TZ.");
-    }
-
-    for (i = 0; i < argc; i++) {
-        free(tz_version[i]);
-    }
-    free(tz_version);
-
-    return StringValue(strdup(ret ? "1" : "0"));
+    return StringValue(strdup("0"));
 }
 
 void Register_librecovery_updater_cm() {
