@@ -14,6 +14,8 @@ PRODUCT_PACKAGES += \
 
 # Wifi
 PRODUCT_PACKAGES += \
+    libqsap_sdk \
+    libQWiFiSoftApCfg \
     libwcnss_qmi \
     libwpa_client \
     wcnss_service
@@ -21,7 +23,6 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     hostapd \
     wificond \
-    wifilogd \
     wpa_supplicant \
     wpa_supplicant.conf
 
